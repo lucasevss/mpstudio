@@ -212,10 +212,32 @@
         .shared-link.show a:hover {
             text-decoration: underline;
         }
+
+        .phone-banner {
+            margin-bottom: 16px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .phone-banner.info {
+            background: rgba(39, 174, 96, 0.85);
+        }
+
+        .phone-banner.warning {
+            background: rgba(235, 87, 87, 0.85);
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="phone-banner" id="phoneBanner"></div>
         <h1>MPStudio - Envio de arquivos grandes pro Whatsapp</h1>
         <p class="subtitle">
             Faça o upload do arquivo que deseja enviar e confira se na URL está o número correto do cliente.
@@ -247,6 +269,7 @@
     </div>
 
     <script>
+        const phoneBanner = document.getElementById('phoneBanner');
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const fileInfo = document.getElementById('fileInfo');
@@ -260,10 +283,30 @@
         const LITTERBOX_DEFAULT_EXPIRY = '1h';
         const WEBHOOK_URL = 'https://webhook.melinapinheiro.com.br/webhook/send_file';
         const PHONE_PARAM = new URLSearchParams(window.location.search).get('phone');
-        const PHONE_DISPLAY = PHONE_PARAM ? PHONE_PARAM.split('@')[0] : null;
+        const PHONE_RAW = PHONE_PARAM ? PHONE_PARAM.split('@')[0] : '';
+        const PHONE_DIGITS = PHONE_RAW ? PHONE_RAW.replace(/\D+/g, '') : '';
+        const PHONE_DISPLAY = PHONE_DIGITS || null;
 
         let selectedFile = null;
         let lastUploadedName = '';
+
+        updatePhoneBanner();
+
+        function updatePhoneBanner() {
+            if (!phoneBanner) {
+                return;
+            }
+
+            if (PHONE_DISPLAY) {
+                phoneBanner.textContent = `O arquivo sera enviado para o numero ${PHONE_DISPLAY}.`;
+                phoneBanner.classList.remove('warning');
+                phoneBanner.classList.add('info');
+            } else {
+                phoneBanner.textContent = 'Nenhum telefone selecionado. Atualize o endereco da pagina incluindo ?phone=NUMERO.';
+                phoneBanner.classList.remove('info');
+                phoneBanner.classList.add('warning');
+            }
+        }
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
